@@ -1,0 +1,14 @@
+.project
+.classpath
+.springBeans
+.mvn
+.settings/
+target/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Maven
+*.log

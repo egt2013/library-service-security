@@ -1,0 +1,259 @@
+openapi: 3.0.1
+info:
+  title: Book Application API
+  description: This is a sample Spring Boot RESTful service using springdoc-openapi and OpenAPI 3.
+  termsOfService: terms
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+
+paths:
+  /api/books:
+    get:
+      summary: returns a list of book
+      tags:
+        - "Book"
+      description: get all books in library
+      operationId: getAllBooks
+      responses:
+        200:
+          description: Response with datalist of books in library
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookDto'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Adds a new book
+      tags:
+        - "Book"
+      description: create a new book
+      operationId: createBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDto'
+      responses:
+        201:
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /api/books/{id}:
+    put:
+      summary: update a book
+      tags:
+        - "Book"
+      description: update a book by id
+      operationId: updateBook
+      parameters:
+        - name: id
+          in: path
+          description: book id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDto'
+      responses:
+        200:
+          description: Book updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: delete a book
+      tags:
+        - "Book"
+      description: delete a book by id
+      operationId: deleteBook
+      parameters:
+        - name: id
+          in: path
+          description: book id
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: book deleted
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: returns a book
+      tags:
+        - "Book"
+      description: Get a book by id
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          description: book id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Search Book by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+
+components:
+  parameters:
+    lang:
+      name: lang
+      in: header
+      description: "The language to use"
+      required: true
+      schema:
+        type: string
+  schemas:
+    BookDto:
+      description: This is the book model
+      type: object
+      required:
+        - title
+        - author
+        - category
+      properties:
+        id:
+          # Returned by GET, not used in POST/PUT/PATCH
+          type: integer
+          readOnly: true
+          example: 1
+        title:
+          description: The name of book
+          type: string
+          minLength: 0
+          maxLength: 20
+          example: Java
+        author:
+          description: name of author
+          type: string
+          minLength: 0
+          maxLength: 30
+          example: Max Abi
+        category:
+          description: book category
+          type: string
+          enum: ["FANTASY","SCI-FI","MYSTERY","THRILLER","ROMANCE","WESTERNS"]
+        rateScore:
+          description: rate score
+          type: integer
+          minimum: 0
+          maximum: 10
+          default: 0
+        createdDate:
+          type: string
+          format: date-time
+          readOnly: true
+    ApiErrorDto:
+      description: This is the gobal error model
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          description: status of error
+          type: string
+        error:
+          type: string
+        path:
+          type: string
+    UnauthorizedErrorDto:
+      description: This is the gobal error model
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: '#/components/schemas/ApiErrorDto'
+          example:
+            timestamp: "2022-09-21T07:27:44.973+00:00"
+            status: "404"
+            error: "The specified resource was not found"
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorDto'
+          example:
+            timestamp: "2022-09-21T07:27:44.973+00:00"
+            status: "400"
+            error: "Bad Request"
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorDto'
+          example:
+            timestamp: "2022-09-21T07:27:44.973+00:00"
+            status: "500"
+            error: "Internal server error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedErrorDto'
+          example:
+            error: "unauthorized"
+            error_description: "Full authentication is required to access this resource"
